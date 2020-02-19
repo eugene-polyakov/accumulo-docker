@@ -122,14 +122,17 @@ do
 
   echo 'Accumulo not initialised.'
 
-  echo 'Initialise accumulo...'
-  /usr/local/accumulo/bin/accumulo init --instance-name ${INSTANCE_NAME} \
-    --password ${SECRET} --clear-instance-name
-  if [ $? -ne 0 ]
-  then
-    echo Initialisation failed.
-    sleep 1
-    continue
+  if [[ "$1" == "master" ]]; then
+	  echo 'Initialise accumulo...'
+	  /usr/local/accumulo/bin/accumulo init --instance-name ${INSTANCE_NAME} --password ${SECRET} --clear-instance-name
+      if [ $? -ne 0 ]
+      then
+        echo Initialisation failed.
+        sleep 1
+      continue
+  fi
+  else
+	  echo 'NOT initializing accumulo - only master should do that'
   fi
 
   /usr/local/hadoop/bin/hdfs dfs -put /dev/null ${ACCUMULO_INIT}

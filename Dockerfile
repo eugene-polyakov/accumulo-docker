@@ -4,6 +4,7 @@ FROM fedora:29
 ARG ZOOKEEPER_VERSION=3.4.10
 ARG HADOOP_VERSION=2.8.1
 ARG ACCUMULO_VERSION=1.8.1
+ARG GEOMESA_VERSION=2.4.0
 
 RUN echo -e "\n* soft nofile 65536\n* hard nofile 65536" >> /etc/security/limits.conf
 
@@ -22,6 +23,11 @@ RUN ln -s /usr/local/zookeeper-${ZOOKEEPER_VERSION} /usr/local/zookeeper
 # Accumulo
 ADD accumulo-${ACCUMULO_VERSION}-bin.tar.gz /usr/local/
 RUN ln -s /usr/local/accumulo-${ACCUMULO_VERSION} /usr/local/accumulo
+
+# Geomesa
+ADD geomesa-accumulo_2.11-${GEOMESA_VERSION}-bin.tar.gz /usr/local/
+RUN ln -s /usr/local/geomesa-accumulo_2.11-${ACCUMULO_VERSION}/dist/accumulo/geomesa-accumulo-distributed-runtime_2.11-${GEOMESA_VERSION}.jar /usr/local/accumulo/lib/
+
 
 # Diagnostic tools :/
 RUN dnf install -y net-tools

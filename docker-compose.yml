@@ -1,0 +1,173 @@
+version: '3.1'
+
+services:
+
+  zookeeper:
+    image: cybermaggedon/zookeeper:3.4.14
+    volumes:
+      - ./zoo:/data
+    container_name: zookeeper
+    networks:
+       - accumulo
+    environment:
+      - ZOOKEEPER_MYID=zoo-1
+      - ZOOKEEPERS=zookeeper
+
+  namenode:
+    image: cybermaggedon/hadoop:2.9.2
+    container_name: namenode
+    depends_on: 
+      - zookeeper
+    restart: unless-stopped
+    networks:
+      - accumulo
+    ports:
+      - '50070:50070'
+      - '50075:50075'
+      - '50090:50090'
+      - '9000:9000'
+    volumes:
+      - ./hdfs:/data
+    command: /start-namenode
+    
+  datanode:
+    container_name: datanode
+    image: cybermaggedon/hadoop:2.9.2
+    depends_on: 
+      - namenode
+    restart: unless-stopped
+    networks:
+      - accumulo
+    volumes:
+      - ./hdfs/n1:/data
+    command: /start-datanode
+    environment:
+      - NAMENODE_URI=hdfs://namenode:9000
+      
+  # datanode2:
+  #   container_name: datanode-2
+  #   image: cybermaggedon/hadoop:2.9.2
+  #   depends_on:
+  #     - namenode
+  #   restart: unless-stopped
+  #   networks:
+  #     - accumulo
+  #   volumes:
+  #       - ./hdfs/n2:/data
+  #   command: /start-datanode
+  #   environment:
+  #       - NAMENODE_URI=hdfs://namenode:9000
+
+  accumulo-master:
+    image: epolyakov/accumulo:1.9.3
+    command: '/start-process master'
+    container_name: accumulo-master
+    networks:
+      - accumulo
+    depends_on: 
+      - namenode
+    ports:
+      - '50095:50095'
+    environment:
+      - ZOOKEPERS=zookeeper
+      - HDFS_VOLUMES=hdfs://namenode:9000/accumulo
+      - NAMENODE_URI=hdfs://namenode:9000/
+      - MASTER_HOST=accumulo-master
+      - GC_HOSTS=accumulo-gc
+      - TRACER_HOSTS=accumulo-trace
+      - MONITOR_HOSTS=accumulo-monitor
+      - SLAVE_HOSTS=accumulo-slave-1
+    
+  accumulo-gc:
+    image: epolyakov/accumulo:1.9.3
+    command: '/start-process gc'
+    container_name: accumulo-gc
+    depends_on: 
+      - accumulo-master
+    networks:
+      - accumulo
+    environment:
+      - ZOOKEPERS=zookeeper
+      - HDFS_VOLUMES=hdfs://namenode:9000/accumulo
+      - NAMENODE_URI=hdfs://namenode:9000/
+      - MASTER_HOST=accumulo-master
+      - GC_HOSTS=accumulo-gc
+      - TRACER_HOSTS=accumulo-trace
+      - MONITOR_HOSTS=accumulo-monitor
+      - SLAVE_HOSTS=accumulo-slave-1
+    
+  accumulo-tracer:
+    image: epolyakov/accumulo:1.9.3
+    command: '/start-process tracer'
+    container_name: accumulo-tracer
+    depends_on: 
+      - accumulo-master
+    networks:
+      - accumulo
+    environment:
+      - ZOOKEPERS=zookeeper
+      - HDFS_VOLUMES=hdfs://namenode:9000/accumulo
+      - NAMENODE_URI=hdfs://namenode:9000/
+      - MASTER_HOST=accumulo-master
+      - GC_HOSTS=accumulo-gc
+      - TRACER_HOSTS=accumulo-trace
+      - MONITOR_HOSTS=accumulo-monitor
+      - SLAVE_HOSTS=accumulo-slave-1
+    
+  accumulo-monitor:
+    image: epolyakov/accumulo:1.9.3
+    command: '/start-process monitor'
+    container_name: accumulo-monitor
+    depends_on: 
+      - accumulo-master
+    ports:
+      - '9995:9995'
+    networks:
+      - accumulo
+    environment:
+      - ZOOKEPERS=zookeeper
+      - HDFS_VOLUMES=hdfs://namenode:9000/accumulo
+      - NAMENODE_URI=hdfs://namenode:9000/
+      - MASTER_HOST=accumulo-master
+      - GC_HOSTS=accumulo-gc
+      - TRACER_HOSTS=accumulo-trace
+      - MONITOR_HOSTS=accumulo-monitor
+      - SLAVE_HOSTS=accumulo-slave-1
+    
+  accumulo-slave-1:
+    image: epolyakov/accumulo:1.9.3
+    command: '/start-process tserver'
+    container_name: accumulo-slave-1
+    depends_on: 
+      - accumulo-master
+    networks:
+      - accumulo
+    environment:
+      - ZOOKEPERS=zookeeper
+      - HDFS_VOLUMES=hdfs://namenode:9000/accumulo
+      - NAMENODE_URI=hdfs://namenode:9000/
+      - MASTER_HOST=accumulo-master
+      - GC_HOSTS=accumulo-gc
+      - TRACER_HOSTS=accumulo-trace
+      - MONITOR_HOSTS=accumulo-monitor
+      - SLAVE_HOSTS=accumulo-slave-1
+    
+  # accumulo-slave-2:
+  #   image: epolyakov/accumulo:1.9.3
+  #   command: '/start-process tserver'
+  #   container_name: accumulo-slave-2
+  #   networks:
+  #     - accumulo
+  #   environment:
+  #     - ZOOKEPERS=zookeeper
+  #     - HDFS_VOLUMES=hdfs://namenode:9000/accumulo
+  #     - NAMENODE_URI=hdfs://namenode:9000/
+  #     - MY_HOSTNAME=accumulo-slave-2
+  #     - MASTER_HOST=accumulo-master
+  #     - GC_HOSTS=accumulo-gc
+  #     - TRACER_HOSTS=accumulo-trace
+  #     - MONITOR_HOSTS=accumulo-monitor
+  #     - SLAVE_HOSTS=accumulo-slave-1
+
+networks:
+  accumulo:
