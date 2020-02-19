@@ -26,7 +26,7 @@ RUN ln -s /usr/local/accumulo-${ACCUMULO_VERSION} /usr/local/accumulo
 
 # Geomesa
 ADD geomesa-accumulo_2.11-${GEOMESA_VERSION}-bin.tar.gz /usr/local/
-RUN ln -s /usr/local/geomesa-accumulo_2.11-${ACCUMULO_VERSION}/dist/accumulo/geomesa-accumulo-distributed-runtime_2.11-${GEOMESA_VERSION}.jar /usr/local/accumulo/lib/
+RUN ln -s /usr/local/geomesa-accumulo_2.11-${GEOMESA_VERSION}/dist/accumulo/geomesa-accumulo-distributed-runtime_2.11-${GEOMESA_VERSION}.jar /usr/local/accumulo/lib/ext/
 
 
 # Diagnostic tools :/

@@ -139,7 +139,16 @@ do
 
 done
 
+
+
 . /usr/local/accumulo/bin/config.sh
 . /usr/local/accumulo/bin/config-server.sh
+
+if [[ "$1" == "tserver" ]]; then
+	# You do not need the JAR on the Accumulo master server, and including it there may cause classpath issues later.
+	# https://www.geomesa.org/documentation/user/accumulo/install.html#installing-the-accumulo-distributed-runtime-library
+  ln -sf /usr/local/geomesa-accumulo_2.11-2.4.0/dist/accumulo/geomesa-accumulo-distributed-runtime_*.jar. ${ACCUMULO_HOME}/lib/ext/
+fi
+
 
 /usr/local/accumulo/bin/accumulo $1 --address ${MY_HOSTNAME}

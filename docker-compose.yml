@@ -76,7 +76,7 @@ services:
       - GC_HOSTS=accumulo-gc
       - TRACER_HOSTS=accumulo-trace
       - MONITOR_HOSTS=accumulo-monitor
-      - SLAVE_HOSTS=accumulo-slave-1
+      - SLAVE_HOSTS=accumulo-slave-1,accumulo-slave-2
     
   accumulo-gc:
     image: epolyakov/accumulo:1.9.3
@@ -94,7 +94,7 @@ services:
       - GC_HOSTS=accumulo-gc
       - TRACER_HOSTS=accumulo-trace
       - MONITOR_HOSTS=accumulo-monitor
-      - SLAVE_HOSTS=accumulo-slave-1
+      - SLAVE_HOSTS=accumulo-slave-1,accumulo-slave-2
     
   accumulo-tracer:
     image: epolyakov/accumulo:1.9.3
@@ -112,7 +112,7 @@ services:
       - GC_HOSTS=accumulo-gc
       - TRACER_HOSTS=accumulo-trace
       - MONITOR_HOSTS=accumulo-monitor
-      - SLAVE_HOSTS=accumulo-slave-1
+      - SLAVE_HOSTS=accumulo-slave-1,accumulo-slave-2
     
   accumulo-monitor:
     image: epolyakov/accumulo:1.9.3
@@ -132,7 +132,7 @@ services:
       - GC_HOSTS=accumulo-gc
       - TRACER_HOSTS=accumulo-trace
       - MONITOR_HOSTS=accumulo-monitor
-      - SLAVE_HOSTS=accumulo-slave-1
+      - SLAVE_HOSTS=accumulo-slave-1,accumulo-slave-2
     
   accumulo-slave-1:
     image: epolyakov/accumulo:1.9.3
@@ -150,24 +150,25 @@ services:
       - GC_HOSTS=accumulo-gc
       - TRACER_HOSTS=accumulo-trace
       - MONITOR_HOSTS=accumulo-monitor
-      - SLAVE_HOSTS=accumulo-slave-1
+      - SLAVE_HOSTS=accumulo-slave-1,accumulo-slave-2
     
-  # accumulo-slave-2:
-  #   image: epolyakov/accumulo:1.9.3
-  #   command: '/start-process tserver'
-  #   container_name: accumulo-slave-2
-  #   networks:
-  #     - accumulo
-  #   environment:
-  #     - ZOOKEPERS=zookeeper
-  #     - HDFS_VOLUMES=hdfs://namenode:9000/accumulo
-  #     - NAMENODE_URI=hdfs://namenode:9000/
-  #     - MY_HOSTNAME=accumulo-slave-2
-  #     - MASTER_HOST=accumulo-master
-  #     - GC_HOSTS=accumulo-gc
-  #     - TRACER_HOSTS=accumulo-trace
-  #     - MONITOR_HOSTS=accumulo-monitor
-  #     - SLAVE_HOSTS=accumulo-slave-1
+  accumulo-slave-2:
+    image: epolyakov/accumulo:1.9.3
+    command: '/start-process tserver'
+    container_name: accumulo-slave-2
+    depends_on: 
+      - accumulo-master
+    networks:
+      - accumulo
+    environment:
+      - ZOOKEPERS=zookeeper
+      - HDFS_VOLUMES=hdfs://namenode:9000/accumulo
+      - NAMENODE_URI=hdfs://namenode:9000/
+      - MASTER_HOST=accumulo-master
+      - GC_HOSTS=accumulo-gc
+      - TRACER_HOSTS=accumulo-trace
+      - MONITOR_HOSTS=accumulo-monitor
+      - SLAVE_HOSTS=accumulo-slave-1,accumulo-slave-2
 
 networks:
   accumulo:
