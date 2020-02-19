@@ -1,6 +1,6 @@
 
 REPOSITORY=epolyakov/accumulo
-VERSION=$(shell git describe | sed 's/^v//')
+VERSION=1.9.3
 ZOOKEEPER_VERSION=3.4.14
 HADOOP_VERSION=2.9.2
 ACCUMULO_VERSION=1.9.3
